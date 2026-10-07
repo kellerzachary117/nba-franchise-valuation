@@ -2,6 +2,8 @@
 
 What drives the value of an NBA franchise, and how do Forbes valuations compare with what teams actually sell for?
 
+**[Live interactive dashboard](https://kellerzachary117.github.io/nba-franchise-valuation/)**
+
 The project uses a panel of 30 teams over 10 seasons (2017-2026) with Forbes value, revenue, metro population, arena, winning and payroll data. It runs regressions on the panel, checks Forbes values against 8 real sale prices, and draws the results as static charts and an interactive dashboard.
 
 ## Findings
@@ -33,7 +35,7 @@ python3 -m venv .venv
 .venv/bin/python src/make_dashboard.py data/panel.csv
 ```
 
-To view the dashboard, open `docs/index.html` in a browser. It loads its chart library (Plotly) from a CDN, so it needs an internet connection.
+The dashboard is hosted with GitHub Pages from the `docs/` folder. To view it locally, open `docs/index.html` in a browser. It loads its chart library (Plotly) from a CDN, so it needs an internet connection.
 
 ## Models
 
