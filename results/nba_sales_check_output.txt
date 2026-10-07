@@ -1,0 +1,11 @@
+                  team  price   agreed  list     type  forbes  price_vs_forbes
+Minnesota Timberwolves   1500 May 2021  2021  Control    1400            0.071
+          Phoenix Suns   4000 Dec 2022  2023  Control    2700            0.481
+       Milwaukee Bucks   3500 Feb 2023  2023 Minority    2300            0.522
+     Charlotte Hornets   3000 Jun 2023  2023  Control    1700            0.765
+      Dallas Mavericks   3500 Dec 2023  2024  Control    4500           -0.222
+        Boston Celtics   6100 Mar 2025  2025  Control    6000            0.017
+    Los Angeles Lakers  10000 Jun 2025  2025  Control    7100            0.408
+Portland Trail Blazers   4250 Aug 2025  2025  Control    3500            0.214
+
+control sales: median premium 0.214 mean 0.248 n 7

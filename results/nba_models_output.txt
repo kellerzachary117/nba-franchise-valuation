@@ -1,0 +1,55 @@
+
+=== Model A: between teams (year FE)  (n=300, R2=0.833)
+  log_pop        coef +0.3141  se 0.0393  p 0.000  -> +36.9%
+  winpct10       coef +0.0215  se 0.0114  p 0.058  -> +2.2%
+  playoff_score  coef +0.0324  se 0.0278  p 0.244  -> +3.3%
+  arena_age      coef +0.0026  se 0.0035  p 0.469  -> +0.3%
+  owned          coef +0.0901  se 0.1018  p 0.376  -> +9.4%
+
+=== Model B: within teams (team + year FE)  (n=300, R2=0.975)
+  winpct10       coef +0.0089  se 0.0096  p 0.356  -> +0.9%
+  playoff_score  coef +0.0022  se 0.0083  p 0.787  -> +0.2%
+  arena_age      coef -0.0028  se 0.0008  p 0.000  -> -0.3%
+
+=== Model C: revenue multiple, non-COVID rows  (n=240, R2=0.830)
+  log_pop        coef +0.1493  se 0.0182  p 0.000  -> +16.1%
+  winpct10       coef +0.0159  se 0.0090  p 0.077  -> +1.6%
+  playoff_score  coef -0.0089  se 0.0160  p 0.577  -> -0.9%
+  arena_age      coef +0.0030  se 0.0012  p 0.015  -> +0.3%
+  owned          coef -0.0027  se 0.0384  p 0.943  -> -0.3%
+
+=== Share of cross-team value spread (year effects removed), R2:
+  market alone          0.522
+  winning alone         0.037
+  arena alone           0.096
+  all together          0.584
+  year effects' share of total variance in log value: 0.598
+
+max |corr| among predictors:
+                log_pop  winpct10  playoff_score  arena_age  owned
+log_pop           1.00     -0.05           0.00       0.20   0.14
+winpct10         -0.05      1.00           0.75       0.10  -0.02
+playoff_score     0.00      0.75           1.00       0.15  -0.04
+arena_age         0.20      0.10           0.15       1.00   0.29
+owned             0.14     -0.02          -0.04       0.29   1.00
+
+log_pop as elasticity: doubling metro pop -> +24.3% value (Model A), +10.9% multiple (Model C)
+
+=== A robustness: drop NY/LA teams  (n=260, R2=0.839)
+  log_pop        coef +0.2667  se 0.0426  p 0.000  -> +30.6%
+  winpct10       coef +0.0289  se 0.0100  p 0.004  -> +2.9%
+
+=== A robustness: population split in shared markets  (n=300, R2=0.800)
+  log_pop_split  coef +0.3436  se 0.0457  p 0.000  -> +41.0%
+  winpct10       coef +0.0244  se 0.0134  p 0.069  -> +2.5%
+
+=== A robustness: 3-season avg win%  (n=240, R2=0.811)
+  log_pop        coef +0.3038  se 0.0415  p 0.000  -> +35.5%
+  win3           coef +0.0582  se 0.0244  p 0.017  -> +6.0%
+
+teams that changed arenas: ['Detroit Pistons', 'Golden State Warriors', 'LA Clippers', 'Milwaukee Bucks', 'Sacramento Kings']
+
+=== Model B2: within teams, new-arena indicator  (n=300, R2=0.975)
+  winpct10       coef +0.0088  se 0.0096  p 0.360  -> +0.9%
+  playoff_score  coef +0.0013  se 0.0080  p 0.874  -> +0.1%
+  new_arena      coef +0.1038  se 0.0353  p 0.003  -> +10.9%

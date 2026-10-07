@@ -1,0 +1,56 @@
+# Usage: python src/nba_models.py data/panel.csv   (panel.csv = the Panel tab saved as CSV, header row = team,season,...)
+import pandas as pd, numpy as np, statsmodels.formula.api as smf, sys, warnings
+warnings.filterwarnings('ignore')
+df=pd.read_csv(sys.argv[1])
+df['log_val']=np.log(df.forbes_value); df['log_pop']=np.log(df.msa_pop)
+df['log_mult']=np.log(df.forbes_value/df.revenue)
+df['owned']=(df.arena_owned=='Y').astype(int)
+df['winpct10']=df.win_pct*10          # coef = effect of +10 pct pts of win% (~8 wins)
+def fit(f,d): return smf.ols(f,data=d).fit(cov_type='cluster',cov_kwds={'groups':pd.factorize(d.team)[0]})
+def show(name,m,keys):
+    print(f"\n=== {name}  (n={int(m.nobs)}, R2={m.rsquared:.3f})")
+    for k in keys:
+        b,se,p=m.params[k],m.bse[k],m.pvalues[k]
+        print(f"  {k:14s} coef {b:+.4f}  se {se:.4f}  p {p:.3f}  -> {100*(np.exp(b)-1):+.1f}%")
+X=['log_pop','winpct10','playoff_score','arena_age','owned']
+A=fit('log_val ~ log_pop + winpct10 + playoff_score + arena_age + owned + C(season)',df)
+show('Model A: between teams (year FE)',A,X)
+B=fit('log_val ~ winpct10 + playoff_score + arena_age + C(team) + C(season)',df)
+show('Model B: within teams (team + year FE)',B,['winpct10','playoff_score','arena_age'])
+d=df[df.covid_finances==0]
+Cm=fit('log_mult ~ log_pop + winpct10 + playoff_score + arena_age + owned + C(season)',d)
+show("Model C: revenue multiple, non-COVID rows",Cm,X)
+# how much of the cross-team spread does each piece explain? (year effects removed first)
+r=df.copy()
+for c in ['log_val','log_pop','winpct10','playoff_score','arena_age','owned']:
+    r[c+'_d']=r[c]-r.groupby('season')[c].transform('mean')
+def r2(f): return smf.ols(f,data=r).fit().rsquared
+full=r2('log_val_d ~ log_pop_d + winpct10_d + playoff_score_d + arena_age_d + owned_d - 1')
+print(f"\n=== Share of cross-team value spread (year effects removed), R2:")
+print(f"  market alone          {r2('log_val_d ~ log_pop_d - 1'):.3f}")
+print(f"  winning alone         {r2('log_val_d ~ winpct10_d + playoff_score_d - 1'):.3f}")
+print(f"  arena alone           {r2('log_val_d ~ arena_age_d + owned_d - 1'):.3f}")
+print(f"  all together          {full:.3f}")
+print(f"  year effects' share of total variance in log value: {smf.ols('log_val ~ C(season)',df).fit().rsquared:.3f}")
+print("\nmax |corr| among predictors:\n", df[['log_pop','winpct10','playoff_score','arena_age','owned']].corr().round(2))
+print("\nlog_pop as elasticity: doubling metro pop ->", f"{100*(2**A.params['log_pop']-1):+.1f}% value (Model A),", f"{100*(2**Cm.params['log_pop']-1):+.1f}% multiple (Model C)")
+# robustness 1: drop the 4 shared-market teams (NY, LA)
+big=['New York Knicks','Brooklyn Nets','Los Angeles Lakers','LA Clippers']
+A2=fit('log_val ~ log_pop + winpct10 + playoff_score + arena_age + owned + C(season)',df[~df.team.isin(big)])
+show('A robustness: drop NY/LA teams',A2,['log_pop','winpct10'])
+# robustness 2: split population across teams sharing a market
+df['n_in_mkt']=df.groupby(['season','msa_pop']).team.transform('count')
+df['log_pop_split']=np.log(df.msa_pop/df.n_in_mkt)
+A3=fit('log_val ~ log_pop_split + winpct10 + playoff_score + arena_age + owned + C(season)',df)
+show('A robustness: population split in shared markets',A3,['log_pop_split','winpct10'])
+# robustness 3: 3-season average win% (brand built over time)
+df=df.sort_values(['team','season'])
+df['win3']=df.groupby('team').winpct10.transform(lambda s:s.rolling(3,min_periods=3).mean())
+A4=fit('log_val ~ log_pop + win3 + arena_age + owned + C(season)',df.dropna(subset=['win3']))
+show('A robustness: 3-season avg win%',A4,['log_pop','win3'])
+# Model B with a new-arena indicator instead of arena_age (identified only by 5 teams that moved)
+movers=df.groupby('team').arena_open_year.nunique()
+mv=movers[movers>1].index.tolist(); print("\nteams that changed arenas:",mv)
+df['new_arena']=((df.team.isin(mv)) & (df.arena_open_year==df.groupby('team').arena_open_year.transform('max'))).astype(int)
+B2=fit('log_val ~ winpct10 + playoff_score + new_arena + C(team) + C(season)',df)
+show('Model B2: within teams, new-arena indicator',B2,['winpct10','playoff_score','new_arena'])

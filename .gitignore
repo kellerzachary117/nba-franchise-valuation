@@ -1,0 +1,25 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Testing / tooling caches
+.pytest_cache/
+.ipynb_checkpoints/
+.mypy_cache/
+
+# Environment / secrets
+.env
+
+# OS files
+.DS_Store
